@@ -16,13 +16,15 @@ export const WaterBottle: React.FC<WaterBottleProps> = ({
   const fillPercentage = Math.min((currentIntake / dailyGoal) * 100, 100);
   
   // Calculate hydration status and color
-  const getHydrationColor = () => {
+  const getHydrationColors = () => {
     const percentage = (currentIntake / dailyGoal) * 100;
-    if (percentage < 30) return 'from-red-400 to-red-600'; // Dehydrated
-    if (percentage < 60) return 'from-orange-400 to-orange-600'; // Low
-    if (percentage <= 100) return 'from-blue-400 to-blue-600'; // Good
-    return 'from-red-500 to-red-700'; // Over limit
+    if (percentage < 30) return { start: '#f87171', end: '#dc2626', tailwind: 'from-red-400 to-red-600' }; // Dehydrated
+    if (percentage < 60) return { start: '#fb923c', end: '#ea580c', tailwind: 'from-orange-400 to-orange-600' }; // Low
+    if (percentage <= 100) return { start: '#60a5fa', end: '#2563eb', tailwind: 'from-blue-400 to-blue-600' }; // Good
+    return { start: '#ef4444', end: '#b91c1c', tailwind: 'from-red-500 to-red-700' }; // Over limit
   };
+
+  const colors = getHydrationColors();
 
   return (
     <div className={cn("relative mx-auto", className)}>
@@ -45,8 +47,8 @@ export const WaterBottle: React.FC<WaterBottleProps> = ({
           {/* Water fill */}
           <defs>
             <linearGradient id="waterGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" className={`${getHydrationColor().split(' ')[0].replace('from-', 'stop-')}`} />
-              <stop offset="100%" className={`${getHydrationColor().split(' ')[2].replace('to-', 'stop-')}`} />
+              <stop offset="0%" stopColor={colors.start} />
+              <stop offset="100%" stopColor={colors.end} />
             </linearGradient>
           </defs>
           
@@ -81,7 +83,7 @@ export const WaterBottle: React.FC<WaterBottleProps> = ({
       {/* Progress bar */}
       <div className="w-full bg-gray-200 rounded-full h-2 mt-4">
         <div
-          className={`h-2 rounded-full transition-all duration-500 bg-gradient-to-r ${getHydrationColor()}`}
+          className={`h-2 rounded-full transition-all duration-500 bg-gradient-to-r ${colors.tailwind}`}
           style={{ width: `${fillPercentage}%` }}
         />
       </div>
