@@ -3,9 +3,7 @@ import { WaterBottle } from '@/components/WaterBottle';
 import { AddWaterButton } from '@/components/AddWaterButton';
 import { Sidebar } from '@/components/Sidebar';
 import { AlertsPage } from '@/components/AlertsPage';
-import { BackgroundPage } from '@/components/BackgroundPage';
 import { DailyLimitPage } from '@/components/DailyLimitPage';
-import { WeatherAlertsPage } from '@/components/WeatherAlertsPage';
 import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -22,15 +20,6 @@ interface WeatherAlert {
   reason: string;
   weatherDependent: boolean;
 }
-
-const backgroundClasses = {
-  default: 'bg-white',
-  ocean: 'bg-gradient-to-br from-blue-100 to-cyan-100',
-  forest: 'bg-gradient-to-br from-green-100 to-emerald-100',
-  sunset: 'bg-gradient-to-br from-orange-100 to-pink-100',
-  lavender: 'bg-gradient-to-br from-purple-100 to-indigo-100',
-  mint: 'bg-gradient-to-br from-teal-100 to-green-100',
-};
 
 const Index = () => {
   const [currentIntake, setCurrentIntake] = useState(() => {
@@ -58,10 +47,6 @@ const Index = () => {
     return saved ? JSON.parse(saved) : false;
   });
   
-  const [background, setBackground] = useState(() => {
-    return localStorage.getItem('background') || 'default';
-  });
-  
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState('home');
   const { toast } = useToast();
@@ -78,10 +63,6 @@ const Index = () => {
   useEffect(() => {
     localStorage.setItem('alerts', JSON.stringify(alerts));
   }, [alerts]);
-
-  useEffect(() => {
-    localStorage.setItem('background', background);
-  }, [background]);
 
   useEffect(() => {
     localStorage.setItem('weatherAlerts', JSON.stringify(weatherAlerts));
@@ -183,18 +164,16 @@ const Index = () => {
   const renderCurrentPage = () => {
     switch (currentPage) {
       case 'alerts':
-        return <AlertsPage alerts={alerts} onAlertsChange={setAlerts} />;
-      case 'weather-alerts':
         return (
-          <WeatherAlertsPage
+          <AlertsPage 
+            alerts={alerts} 
+            onAlertsChange={setAlerts}
             weatherAlerts={weatherAlerts}
             onWeatherAlertsChange={setWeatherAlerts}
             autoScheduleEnabled={autoScheduleEnabled}
             onAutoScheduleChange={setAutoScheduleEnabled}
           />
         );
-      case 'background':
-        return <BackgroundPage currentBackground={background} onBackgroundChange={setBackground} />;
       case 'limit':
         return <DailyLimitPage dailyGoal={dailyGoal} onDailyGoalChange={setDailyGoal} />;
       default:
@@ -231,7 +210,7 @@ const Index = () => {
   };
 
   return (
-    <div className={`min-h-screen transition-all duration-300 ${backgroundClasses[background as keyof typeof backgroundClasses]}`}>
+    <div className="min-h-screen bg-white">
       <div className="flex">
         <Sidebar
           isOpen={sidebarOpen}
