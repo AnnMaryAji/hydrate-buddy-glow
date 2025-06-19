@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Bell, Palette, Target, Menu, X } from 'lucide-react';
+import { Bell, Palette, Target, Menu, X, CloudSun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -14,6 +13,7 @@ interface SidebarProps {
 const menuItems = [
   { id: 'home', label: 'Water Tracker', icon: Menu },
   { id: 'alerts', label: 'Set Alerts', icon: Bell },
+  { id: 'weather-alerts', label: 'Smart Weather Alerts', icon: CloudSun },
   { id: 'background', label: 'Customize Background', icon: Palette },
   { id: 'limit', label: 'Daily Water Limit', icon: Target },
 ];

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { WaterBottle } from '@/components/WaterBottle';
 import { AddWaterButton } from '@/components/AddWaterButton';
@@ -6,6 +5,7 @@ import { Sidebar } from '@/components/Sidebar';
 import { AlertsPage } from '@/components/AlertsPage';
 import { BackgroundPage } from '@/components/BackgroundPage';
 import { DailyLimitPage } from '@/components/DailyLimitPage';
+import { WeatherAlertsPage } from '@/components/WeatherAlertsPage';
 import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -14,6 +14,13 @@ interface Alert {
   id: string;
   time: string;
   enabled: boolean;
+}
+
+interface WeatherAlert {
+  id: string;
+  time: string;
+  reason: string;
+  weatherDependent: boolean;
 }
 
 const backgroundClasses = {
@@ -41,6 +48,16 @@ const Index = () => {
     return saved ? JSON.parse(saved) : [];
   });
   
+  const [weatherAlerts, setWeatherAlerts] = useState<WeatherAlert[]>(() => {
+    const saved = localStorage.getItem('weatherAlerts');
+    return saved ? JSON.parse(saved) : [];
+  });
+  
+  const [autoScheduleEnabled, setAutoScheduleEnabled] = useState(() => {
+    const saved = localStorage.getItem('autoScheduleEnabled');
+    return saved ? JSON.parse(saved) : false;
+  });
+  
   const [background, setBackground] = useState(() => {
     return localStorage.getItem('background') || 'default';
   });
@@ -66,6 +83,14 @@ const Index = () => {
     localStorage.setItem('background', background);
   }, [background]);
 
+  useEffect(() => {
+    localStorage.setItem('weatherAlerts', JSON.stringify(weatherAlerts));
+  }, [weatherAlerts]);
+
+  useEffect(() => {
+    localStorage.setItem('autoScheduleEnabled', JSON.stringify(autoScheduleEnabled));
+  }, [autoScheduleEnabled]);
+
   // Reset intake at midnight
   useEffect(() => {
     const checkMidnight = () => {
@@ -88,12 +113,13 @@ const Index = () => {
     return () => clearInterval(interval);
   }, [toast]);
 
-  // Alert system
+  // Enhanced alert system that includes weather alerts
   useEffect(() => {
     const checkAlerts = () => {
       const now = new Date();
       const currentTime = now.toTimeString().slice(0, 5);
       
+      // Check regular alerts
       alerts.forEach(alert => {
         if (alert.enabled && alert.time === currentTime) {
           toast({
@@ -102,11 +128,23 @@ const Index = () => {
           });
         }
       });
+
+      // Check weather-based alerts if auto-schedule is enabled
+      if (autoScheduleEnabled) {
+        weatherAlerts.forEach(alert => {
+          if (alert.time === currentTime) {
+            toast({
+              title: "Smart Hydration Alert! 🌤️💧",
+              description: alert.reason,
+            });
+          }
+        });
+      }
     };
 
     const interval = setInterval(checkAlerts, 60000); // Check every minute
     return () => clearInterval(interval);
-  }, [alerts, toast]);
+  }, [alerts, weatherAlerts, autoScheduleEnabled, toast]);
 
   const addWater = () => {
     const newIntake = currentIntake + 500;
@@ -146,6 +184,15 @@ const Index = () => {
     switch (currentPage) {
       case 'alerts':
         return <AlertsPage alerts={alerts} onAlertsChange={setAlerts} />;
+      case 'weather-alerts':
+        return (
+          <WeatherAlertsPage
+            weatherAlerts={weatherAlerts}
+            onWeatherAlertsChange={setWeatherAlerts}
+            autoScheduleEnabled={autoScheduleEnabled}
+            onAutoScheduleChange={setAutoScheduleEnabled}
+          />
+        );
       case 'background':
         return <BackgroundPage currentBackground={background} onBackgroundChange={setBackground} />;
       case 'limit':
